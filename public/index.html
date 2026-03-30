@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SourceShop — Jual Beli Source Code</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            zinc: {
+              950: '#09090b',
+            }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease forwards',
+            'slide-up': 'slideUp 0.4s ease forwards',
+            'pulse-slow': 'pulse 3s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
+            slideUp: { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .card-hover { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(139,92,246,0.12); }
+    .glow { box-shadow: 0 0 40px rgba(139,92,246,0.15); }
+    .gradient-text { background: linear-gradient(135deg, #a78bfa, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .grid-bg {
+      background-image: linear-gradient(rgba(139,92,246,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    input, textarea, select { outline: none; }
+    .animate-in { animation: slideUp 0.4s ease forwards; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+
+<!-- NAVBAR -->
+<nav class="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800/60 bg-zinc-950/80 backdrop-blur-xl">
+  <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center text-xs font-bold">S</div>
+      <span class="font-bold text-base tracking-tight">Source<span class="text-violet-400">Shop</span></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="showCheckOrder()" class="px-3 py-1.5 text-sm font-medium text-zinc-400 hover:text-zinc-100 border border-zinc-800 hover:border-zinc-600 rounded-lg transition-all">
+        Cek Order
+      </button>
+      <button onclick="showAdmin()" class="px-3 py-1.5 text-sm font-semibold bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-all">
+        Admin
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN APP -->
+<div id="app-main">
+  <!-- HERO -->
+  <div class="grid-bg pt-32 pb-20 px-4 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-violet-950/20 via-transparent to-zinc-950 pointer-events-none"></div>
+    <div class="relative max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs font-mono mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse-slow"></span>
+        Source Code Premium · Siap Pakai
+      </div>
+      <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-none mb-5">
+        Beli <span class="gradient-text">Source Code</span><br>Siap Deploy
+      </h1>
+      <p class="text-zinc-400 text-lg leading-relaxed mb-8 max-w-xl mx-auto">
+        Koleksi website, aplikasi Android, dan preset digital premium. Beli sekali, pakai selamanya.
+      </p>
+      <div class="flex gap-3 justify-center flex-wrap">
+        <button onclick="scrollToProducts()" class="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all hover:-translate-y-0.5 shadow-lg shadow-violet-900/40">
+          Lihat Produk →
+        </button>
+        <button onclick="showCheckOrder()" class="px-6 py-3 border border-zinc-700 hover:border-zinc-500 text-zinc-300 font-semibold rounded-xl transition-all">
+          Cek Status Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div id="products-section" class="max-w-6xl mx-auto px-4 mt-10 mb-6 flex flex-wrap gap-2 items-center">
+    <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-violet-500 bg-violet-600 text-white transition-all" onclick="filterProducts(this, '')">Semua</button>
+    <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-all" onclick="filterProducts(this, 'website')">Website</button>
+    <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-all" onclick="filterProducts(this, 'android')">Android</button>
+    <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-all" onclick="filterProducts(this, 'preset')">Preset</button>
+    <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-all" onclick="filterProducts(this, 'tools')">Tools</button>
+    <div class="ml-auto relative">
+      <input type="text" placeholder="🔍 Cari produk..." oninput="searchProducts(this.value)"
+        class="w-52 pl-4 pr-4 py-2 text-sm bg-zinc-900 border border-zinc-700 focus:border-violet-500 rounded-lg text-zinc-200 placeholder-zinc-500 transition-all">
+    </div>
+  </div>
+
+  <!-- PRODUCTS GRID -->
+  <div id="products-grid" class="max-w-6xl mx-auto px-4 pb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="col-span-full flex flex-col items-center justify-center py-20 text-zinc-500">
+      <div class="w-8 h-8 border-2 border-zinc-700 border-t-violet-500 rounded-full animate-spin mb-4"></div>
+      <span class="text-sm font-mono">Memuat produk...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="app-admin" class="hidden">
+  <!-- Login -->
+  <div id="admin-login-view" class="min-h-screen flex items-center justify-center px-4 pt-14">
+    <div class="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-8 glow animate-in">
+      <div class="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center text-lg font-bold mb-6">🔐</div>
+      <h2 class="text-xl font-bold mb-1">Admin Panel</h2>
+      <p class="text-zinc-500 text-sm mb-6">Masukkan token untuk masuk</p>
+      <input type="password" id="admin-token-input" placeholder="Token admin..."
+        class="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-500 mb-3 transition-all"
+        onkeydown="if(event.key==='Enter')adminLogin()">
+      <button onclick="adminLogin()" class="w-full py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all mb-2">Masuk</button>
+      <button onclick="showMain()" class="w-full py-3 border border-zinc-700 hover:border-zinc-500 text-zinc-400 font-semibold rounded-xl transition-all text-sm">← Kembali ke Toko</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="admin-dashboard-view" class="hidden pt-20">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl font-extrabold tracking-tight">Dashboard Admin</h2>
+          <p class="text-zinc-500 text-sm mt-1">Kelola produk dan order kamu</p>
+        </div>
+        <button onclick="showMain()" class="px-4 py-2 text-sm border border-zinc-700 hover:border-zinc-500 text-zinc-400 rounded-xl transition-all">← Ke Toko</button>
+      </div>
+
+      <!-- Stats -->
+      <div id="admin-stats" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+
+      <!-- Tabs -->
+      <div class="flex gap-2 mb-6 border-b border-zinc-800 pb-4">
+        <button class="tab-btn px-4 py-2 text-sm font-semibold rounded-lg bg-violet-600 text-white transition-all" onclick="switchTab(this,'tab-orders')">📦 Orders</button>
+        <button class="tab-btn px-4 py-2 text-sm font-semibold rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 transition-all" onclick="switchTab(this,'tab-products')">🛍️ Produk</button>
+        <button class="tab-btn px-4 py-2 text-sm font-semibold rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 transition-all" onclick="switchTab(this,'tab-add-product')">➕ Tambah</button>
+      </div>
+
+      <!-- Tab Orders -->
+      <div id="tab-orders">
+        <div class="flex gap-2 mb-4 flex-wrap">
+          <button class="filter-btn-admin px-3 py-1.5 text-xs font-semibold rounded-lg border border-violet-500 bg-violet-600 text-white transition-all" onclick="loadOrders(this,'')">Semua</button>
+          <button class="filter-btn-admin px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-700 text-zinc-400 transition-all" onclick="loadOrders(this,'pending')">Pending</button>
+          <button class="filter-btn-admin px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-700 text-zinc-400 transition-all" onclick="loadOrders(this,'paid')">Paid</button>
+          <button class="filter-btn-admin px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-700 text-zinc-400 transition-all" onclick="loadOrders(this,'rejected')">Rejected</button>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-zinc-800">
+          <table class="w-full text-sm">
+            <thead class="bg-zinc-900">
+              <tr>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Order ID</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Pembeli</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Produk</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Harga</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Status</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Tanggal</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="orders-table-body" class="divide-y divide-zinc-800/50"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab Products -->
+      <div id="tab-products" class="hidden">
+        <div class="overflow-x-auto rounded-xl border border-zinc-800">
+          <table class="w-full text-sm">
+            <thead class="bg-zinc-900">
+              <tr>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Produk</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Kategori</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Harga</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Status</th>
+                <th class="text-left px-4 py-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="products-table-body" class="divide-y divide-zinc-800/50"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab Add Product -->
+      <div id="tab-add-product" class="hidden">
+        <div class="max-w-xl bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <h3 class="font-bold text-lg mb-5">Tambah Produk Baru</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Judul Produk *</label>
+              <input type="text" id="p-title" placeholder="Anime Streaming Website" class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 transition-all">
+            </div>
+            <div>
+              <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Deskripsi</label>
+              <textarea id="p-desc" rows="3" placeholder="Deskripsi produk..." class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 resize-none transition-all"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Harga (Rp) *</label>
+                <input type="number" id="p-price" placeholder="150000" class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 transition-all">
+              </div>
+              <div>
+                <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Kategori</label>
+                <select id="p-category" class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 transition-all">
+                  <option value="website">Website</option>
+                  <option value="android">Android</option>
+                  <option value="preset">Preset</option>
+                  <option value="tools">Tools</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Link Google Drive (ZIP) *</label>
+              <input type="text" id="p-gdrive" placeholder="https://drive.google.com/file/d/xxx/view" class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 transition-all">
+            </div>
+            <div>
+              <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Thumbnail URL</label>
+              <input type="text" id="p-thumbnail" placeholder="https://..." class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 transition-all">
+            </div>
+            <div>
+              <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Tech Stack <span class="text-zinc-600">(pisah koma)</span></label>
+              <input type="text" id="p-tech" placeholder="Node.js, Express, Supabase" class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 transition-all">
+            </div>
+            <div>
+              <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Fitur <span class="text-zinc-600">(pisah koma)</span></label>
+              <input type="text" id="p-features" placeholder="Auth sistem, Admin panel, Responsive" class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 transition-all">
+            </div>
+            <div>
+              <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Preview HTML <span class="text-zinc-600">(opsional — sandbox interaktif)</span></label>
+              <textarea id="p-preview" rows="5" placeholder="<!DOCTYPE html><html>..." class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 resize-none font-mono transition-all"></textarea>
+            </div>
+            <button onclick="submitProduct()" class="w-full py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all">
+              Tambah Produk
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Detail Produk -->
+<div id="product-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto scrollbar-hide animate-in">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10">
+      <h2 id="modal-title" class="font-bold text-lg">Detail Produk</h2>
+      <button onclick="closeModal('product-modal')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-lg transition-all">×</button>
+    </div>
+    <div id="modal-body" class="p-6"></div>
+  </div>
+</div>
+
+<!-- MODAL: Cek Order -->
+<div id="order-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md animate-in">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+      <h2 class="font-bold text-lg">Cek Status Order</h2>
+      <button onclick="closeModal('order-modal')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-lg transition-all">×</button>
+    </div>
+    <div class="p-6">
+      <label class="block text-xs text-zinc-500 mb-1.5 font-medium">Order ID</label>
+      <input type="text" id="check-order-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+        class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 mb-3 font-mono transition-all"
+        onkeydown="if(event.key==='Enter')checkOrderStatus()">
+      <button onclick="checkOrderStatus()" class="w-full py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all">Cek Status</button>
+      <div id="order-status-result" class="mt-4"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-5 right-5 z-[999] px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-sm font-medium shadow-xl translate-y-16 opacity-0 transition-all duration-300 max-w-xs"></div>
+
+<script>
+  const API = '';
+  let adminToken = localStorage.getItem('admin_token') || '';
+  let currentCategory = '';
+
+  async function init() { await loadProducts(); }
+
+  // =====================
+  // PRODUCTS
+  // =====================
+  async function loadProducts(category = '', search = '') {
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-20 text-zinc-500">
+      <div class="w-8 h-8 border-2 border-zinc-700 border-t-violet-500 rounded-full animate-spin mb-4"></div>
+      <span class="text-sm font-mono">Memuat produk...</span></div>`;
+    try {
+      let url = `${API}/api/products?`;
+      if (category) url += `category=${category}&`;
+      if (search) url += `search=${search}&`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (!json.success || !json.data.length) {
+        grid.innerHTML = `<div class="col-span-full text-center py-20 text-zinc-600 font-mono text-sm">// belum ada produk</div>`;
+        return;
+      }
+      renderProducts(json.data);
+    } catch(e) {
+      grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500 text-sm">Gagal memuat produk</div>`;
+    }
+  }
+
+  function renderProducts(products) {
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = products.map(p => `
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden card-hover cursor-pointer group" onclick="openProduct('${p.id}')">
+        <div class="h-48 bg-zinc-800 relative overflow-hidden">
+          ${p.preview_html
+            ? `<iframe srcdoc="${escapeAttr(p.preview_html)}" sandbox="allow-scripts" class="w-full h-full border-none pointer-events-none"></iframe>`
+            : p.thumbnail_url
+              ? `<img src="${p.thumbnail_url}" alt="${p.title}" class="w-full h-full object-cover" loading="lazy">`
+              : `<div class="flex items-center justify-center h-full text-zinc-600 text-xs font-mono">// no preview</div>`
+          }
+          <div class="absolute inset-0 bg-gradient-to-t from-zinc-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest">${p.category}</span>
+          </div>
+          <h3 class="font-bold text-base leading-tight mb-2 group-hover:text-violet-300 transition-colors">${p.title}</h3>
+          <p class="text-zinc-500 text-xs leading-relaxed mb-3 line-clamp-2">${p.description || 'Source code berkualitas siap pakai.'}</p>
+          ${p.tech_stack?.length ? `
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              ${p.tech_stack.slice(0,3).map(t => `<span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-400">${t}</span>`).join('')}
+            </div>` : '<div class="mb-4"></div>'}
+          <div class="flex items-center justify-between pt-3 border-t border-zinc-800">
+            <div>
+              <span class="text-xl font-extrabold font-mono text-violet-400">Rp ${formatPrice(p.price)}</span>
+              <span class="text-xs text-zinc-600 ml-1">/ sekali</span>
+            </div>
+            <span class="text-xs font-semibold px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-all">Beli →</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filterProducts(btn, category) {
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.className = 'filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 transition-all';
+    });
+    btn.className = 'filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-violet-500 bg-violet-600 text-white transition-all';
+    currentCategory = category;
+    loadProducts(category);
+  }
+
+  function searchProducts(q) { loadProducts(currentCategory, q); }
+
+  // =====================
+  // PRODUCT DETAIL MODAL
+  // =====================
+  async function openProduct(id) {
+    document.getElementById('product-modal').classList.remove('hidden');
+    document.getElementById('modal-body').innerHTML = `<div class="flex justify-center py-10"><div class="w-8 h-8 border-2 border-zinc-700 border-t-violet-500 rounded-full animate-spin"></div></div>`;
+    try {
+      const res = await fetch(`${API}/api/products/${id}`);
+      const json = await res.json();
+      const p = json.data;
+      document.getElementById('modal-title').textContent = p.title;
+      document.getElementById('modal-body').innerHTML = `
+        ${p.preview_html ? `
+          <div class="w-full h-60 rounded-xl overflow-hidden border border-zinc-800 mb-5 bg-zinc-800">
+            <iframe srcdoc="${escapeAttr(p.preview_html)}" sandbox="allow-scripts" class="w-full h-full border-none"></iframe>
+          </div>` : p.thumbnail_url ? `<img src="${p.thumbnail_url}" class="w-full rounded-xl mb-5 border border-zinc-800" alt="">` : ''}
+
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="text-[10px] font-mono px-2 py-1 rounded-lg bg-violet-500/10 border border-violet-500/30 text-violet-400 uppercase tracking-wider">${p.category}</span>
+          ${p.tech_stack?.map(t => `<span class="text-[10px] font-mono px-2 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400">${t}</span>`).join('') || ''}
+        </div>
+
+        <p class="text-zinc-400 text-sm leading-relaxed mb-5">${p.description || ''}</p>
+
+        ${p.features?.length ? `
+          <div class="bg-zinc-800/50 rounded-xl p-4 mb-5">
+            <p class="text-xs font-semibold text-zinc-400 mb-3 uppercase tracking-wider">✨ Fitur Termasuk</p>
+            <ul class="space-y-2">
+              ${p.features.map(f => `<li class="flex items-center gap-2 text-sm text-zinc-300"><span class="text-green-400 font-bold">✓</span>${f}</li>`).join('')}
+            </ul>
+          </div>` : ''}
+
+        <div class="flex items-center justify-between py-4 border-t border-zinc-800 mb-5">
+          <div>
+            <span class="text-2xl font-extrabold font-mono text-violet-400">Rp ${formatPrice(p.price)}</span>
+            <span class="text-xs text-zinc-600 ml-2">sekali bayar</span>
+          </div>
+        </div>
+
+        <h3 class="font-bold text-sm mb-4">📋 Form Pembelian</h3>
+        <div class="space-y-3 mb-4">
+          <div>
+            <label class="block text-xs text-zinc-500 mb-1">Nama Lengkap *</label>
+            <input type="text" id="b-name" placeholder="John Doe" class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 transition-all">
+          </div>
+          <div>
+            <label class="block text-xs text-zinc-500 mb-1">Email *</label>
+            <input type="email" id="b-email" placeholder="email@kamu.com" class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 transition-all">
+          </div>
+          <div>
+            <label class="block text-xs text-zinc-500 mb-1">WhatsApp *</label>
+            <input type="text" id="b-wa" placeholder="628xxxxxxxxxx" class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-xl text-sm text-zinc-200 placeholder-zinc-600 transition-all">
+          </div>
+        </div>
+        <button onclick="submitOrder('${p.id}')" class="w-full py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl transition-all">
+          Beli Sekarang — Rp ${formatPrice(p.price)}
+        </button>
+        <p class="text-center text-zinc-600 text-xs mt-3">Setelah submit, kamu mendapat info rekening untuk transfer</p>
+      `;
+    } catch(e) {
+      document.getElementById('modal-body').innerHTML = `<p class="text-center text-red-400 py-10">Gagal memuat produk.</p>`;
+    }
+  }
+
+  // =====================
+  // ORDER
+  // =====================
+  async function submitOrder(productId) {
+    const name = document.getElementById('b-name').value.trim();
+    const email = document.getElementById('b-email').value.trim();
+    const wa = document.getElementById('b-wa').value.trim();
+    if (!name || !email || !wa) return showToast('Semua field wajib diisi!', 'error');
+    try {
+      const res = await fetch(`${API}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId, buyer_name: name, buyer_email: email, buyer_whatsapp: wa })
+      });
+      const json = await res.json();
+      if (!json.success) return showToast(json.error, 'error');
+      const { data } = json;
+      document.getElementById('modal-body').innerHTML = `
+        <div class="text-center mb-6">
+          <div class="text-5xl mb-3">🎉</div>
+          <h3 class="font-bold text-lg">Order Berhasil!</h3>
+          <p class="text-zinc-500 text-sm mt-1">Simpan Order ID ini</p>
+          <div class="mt-3 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl font-mono text-xs text-violet-300 break-all">${data.order_id}</div>
+        </div>
+        <div class="bg-zinc-800/60 border border-zinc-700 rounded-xl p-4 mb-4">
+          <p class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">💳 Info Transfer</p>
+          ${[
+            ['Bank', data.payment.bank],
+            ['No. Rekening', data.payment.account_number],
+            ['Atas Nama', data.payment.account_name],
+            ['Jumlah', `Rp ${formatPrice(data.payment.amount)}`],
+          ].map(([k,v]) => `
+            <div class="flex justify-between items-center py-2 border-b border-zinc-700/50 last:border-0">
+              <span class="text-xs text-zinc-500">${k}</span>
+              <span class="text-sm font-mono font-semibold text-zinc-200">${v}
+                <button onclick="copyText('${v}')" class="ml-2 text-[10px] px-2 py-0.5 bg-violet-500/20 border border-violet-500/30 text-violet-400 rounded-md">copy</button>
+              </span>
+            </div>`).join('')}
+          <div class="flex justify-between items-center pt-2">
+            <span class="text-xs text-zinc-500">Berita</span>
+            <span class="text-xs font-mono text-zinc-300">${data.payment.note}
+              <button onclick="copyText('${data.payment.note}')" class="ml-1 text-[10px] px-2 py-0.5 bg-violet-500/20 border border-violet-500/30 text-violet-400 rounded-md">copy</button>
+            </span>
+          </div>
+        </div>
+        <a href="${data.whatsapp_confirm}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition-all text-sm mb-2">
+          📲 Konfirmasi via WhatsApp
+        </a>
+        <p class="text-center text-zinc-600 text-xs">Setelah transfer, hubungi admin untuk konfirmasi.</p>
+      `;
+    } catch(e) { showToast('Gagal membuat order', 'error'); }
+  }
+
+  async function checkOrderStatus() {
+    const id = document.getElementById('check-order-id').value.trim();
+    if (!id) return showToast('Masukkan Order ID', 'error');
+    const result = document.getElementById('order-status-result');
+    result.innerHTML = `<div class="flex justify-center py-4"><div class="w-6 h-6 border-2 border-zinc-700 border-t-violet-500 rounded-full animate-spin"></div></div>`;
+    try {
+      const res = await fetch(`${API}/api/orders/${id}/status`);
+      const json = await res.json();
+      if (!json.success) { result.innerHTML = `<p class="text-red-400 text-sm text-center">Order tidak ditemukan.</p>`; return; }
+      const o = json.data;
+      const statusColor = { pending: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30', paid: 'text-green-400 bg-green-400/10 border-green-400/30', rejected: 'text-red-400 bg-red-400/10 border-red-400/30' };
+      result.innerHTML = `
+        <div class="bg-zinc-800/60 border border-zinc-700 rounded-xl p-4">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-xs text-zinc-500">Status</span>
+            <span class="text-xs font-mono font-bold px-3 py-1 rounded-full border ${statusColor[o.status]}">${o.status.toUpperCase()}</span>
+          </div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs text-zinc-500">Nama</span><span class="text-sm font-semibold">${o.buyer_name}</span>
+          </div>
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-xs text-zinc-500">Total</span><span class="text-sm font-mono font-bold text-violet-400">Rp ${formatPrice(o.amount)}</span>
+          </div>
+          ${o.status === 'paid' && o.download_url ? `
+            <a href="${o.download_url}" class="flex items-center justify-center gap-2 w-full py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl transition-all text-sm">
+              ⬇️ Download Source Code
+            </a>
+            <p class="text-center text-zinc-600 text-xs mt-2">Berlaku hingga ${new Date(o.expired_at).toLocaleDateString('id-ID')}</p>
+          ` : o.status === 'pending' ? `<p class="text-center text-yellow-400/80 text-xs">Menunggu konfirmasi admin setelah transfer.</p>`
+          : o.is_expired ? `<p class="text-center text-red-400 text-xs">Link expired. Hubungi admin.</p>`
+          : `<p class="text-center text-red-400 text-xs">Order ditolak. Hubungi admin.</p>`}
+        </div>`;
+    } catch(e) { result.innerHTML = `<p class="text-red-400 text-sm text-center">Gagal mengecek status.</p>`; }
+  }
+
+  // =====================
+  // ADMIN
+  // =====================
+  function showAdmin() {
+    document.getElementById('app-main').classList.add('hidden');
+    document.getElementById('app-admin').classList.remove('hidden');
+    if (adminToken) showAdminDashboard();
+  }
+
+  function adminLogin() {
+    adminToken = document.getElementById('admin-token-input').value;
+    localStorage.setItem('admin_token', adminToken);
+    showAdminDashboard();
+  }
+
+  async function showAdminDashboard() {
+    try {
+      const res = await fetch(`${API}/api/admin/stats`, { headers: { 'x-admin-token': adminToken } });
+      if (!res.ok) { localStorage.removeItem('admin_token'); adminToken = ''; showToast('Token salah!', 'error'); return; }
+      const json = await res.json();
+      document.getElementById('admin-login-view').classList.add('hidden');
+      document.getElementById('admin-dashboard-view').classList.remove('hidden');
+      const s = json.data;
+      document.getElementById('admin-stats').innerHTML = [
+        ['PRODUK', s.total_products],
+        ['TOTAL ORDER', s.total_orders],
+        ['ORDER PAID', s.total_paid],
+        ['REVENUE', `<span class="text-base">Rp ${formatPrice(s.total_revenue)}</span>`],
+      ].map(([label, val]) => `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+          <p class="text-xs font-mono text-zinc-500 mb-2">${label}</p>
+          <p class="text-3xl font-extrabold text-violet-400">${val}</p>
+        </div>`).join('');
+      loadOrders(null, 'pending');
+    } catch(e) { showToast('Gagal connect ke server', 'error'); }
+  }
+
+  async function loadOrders(btn, status = '') {
+    if (btn) {
+      document.querySelectorAll('.filter-btn-admin').forEach(b => {
+        b.className = 'filter-btn-admin px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-700 text-zinc-400 transition-all';
+      });
+      btn.className = 'filter-btn-admin px-3 py-1.5 text-xs font-semibold rounded-lg border border-violet-500 bg-violet-600 text-white transition-all';
+    }
+    const tbody = document.getElementById('orders-table-body');
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-zinc-600 font-mono text-xs">Memuat...</td></tr>`;
+    try {
+      const res = await fetch(`${API}/api/admin/orders${status ? '?status='+status : ''}`, { headers: { 'x-admin-token': adminToken } });
+      const json = await res.json();
+      if (!json.data.length) { tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-zinc-600 font-mono text-xs">// tidak ada order</td></tr>`; return; }
+      const sc = { pending: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30', paid: 'text-green-400 bg-green-400/10 border-green-400/30', rejected: 'text-red-400 bg-red-400/10 border-red-400/30' };
+      tbody.innerHTML = json.data.map(o => `
+        <tr class="hover:bg-zinc-800/30 transition-colors">
+          <td class="px-4 py-3 font-mono text-xs text-zinc-400">${o.id.slice(0,8).toUpperCase()}</td>
+          <td class="px-4 py-3"><div class="font-semibold text-sm">${o.buyer_name}</div><div class="text-xs text-zinc-500">${o.buyer_email}</div></td>
+          <td class="px-4 py-3 text-sm text-zinc-300">${o.products?.title || '-'}</td>
+          <td class="px-4 py-3 font-mono text-sm">Rp ${formatPrice(o.amount)}</td>
+          <td class="px-4 py-3"><span class="text-xs font-mono font-bold px-2 py-1 rounded-full border ${sc[o.status]}">${o.status}</span></td>
+          <td class="px-4 py-3 text-xs text-zinc-500">${new Date(o.created_at).toLocaleDateString('id-ID')}</td>
+          <td class="px-4 py-3">
+            ${o.status === 'pending' ? `
+              <button onclick="confirmOrder('${o.id}')" class="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg font-semibold mr-1 transition-all">✓ OK</button>
+              <button onclick="rejectOrder('${o.id}')" class="text-xs px-3 py-1.5 border border-zinc-700 text-zinc-400 hover:text-red-400 rounded-lg font-semibold transition-all">✗</button>
+            ` : o.status === 'paid' ? `
+              <button onclick="copyText('${window.location.origin}/api/download/${o.download_token}')" class="text-xs px-3 py-1.5 border border-zinc-700 text-zinc-400 rounded-lg transition-all">Copy Link</button>
+            ` : '-'}
+          </td>
+        </tr>`).join('');
+    } catch(e) { tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-red-400 text-sm">Gagal memuat</td></tr>`; }
+  }
+
+  async function confirmOrder(id) {
+    if (!confirm('Konfirmasi pembayaran?')) return;
+    try {
+      const res = await fetch(`${API}/api/admin/orders/${id}/confirm`, { method: 'POST', headers: { 'x-admin-token': adminToken } });
+      const json = await res.json();
+      if (!json.success) return showToast(json.error, 'error');
+      showToast('✅ Order dikonfirmasi!', 'success');
+      if (confirm('Buka WhatsApp kirim link ke pembeli?')) window.open(json.data.whatsapp_message, '_blank');
+      loadOrders(null, '');
+    } catch(e) { showToast('Gagal konfirmasi', 'error'); }
+  }
+
+  async function rejectOrder(id) {
+    const reason = prompt('Alasan penolakan:') || 'Pembayaran tidak valid';
+    try {
+      await fetch(`${API}/api/admin/orders/${id}/reject`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ reason }) });
+      showToast('Order ditolak', 'success');
+      loadOrders(null, '');
+    } catch(e) {}
+  }
+
+  async function loadAdminProducts() {
+    const tbody = document.getElementById('products-table-body');
+    try {
+      const res = await fetch(`${API}/api/admin/products`, { headers: { 'x-admin-token': adminToken } });
+      const json = await res.json();
+      tbody.innerHTML = json.data.map(p => `
+        <tr class="hover:bg-zinc-800/30 transition-colors">
+          <td class="px-4 py-3 font-semibold text-sm">${p.title}</td>
+          <td class="px-4 py-3"><span class="text-[10px] font-mono px-2 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-400">${p.category}</span></td>
+          <td class="px-4 py-3 font-mono text-sm text-violet-400">Rp ${formatPrice(p.price)}</td>
+          <td class="px-4 py-3"><span class="text-xs font-mono px-2 py-1 rounded-full border ${p.is_active ? 'text-green-400 bg-green-400/10 border-green-400/30' : 'text-red-400 bg-red-400/10 border-red-400/30'}">${p.is_active ? 'aktif' : 'nonaktif'}</span></td>
+          <td class="px-4 py-3"><button onclick="deleteProduct('${p.id}')" class="text-xs px-3 py-1.5 border border-zinc-700 text-zinc-400 hover:text-red-400 rounded-lg transition-all">Nonaktifkan</button></td>
+        </tr>`).join('');
+    } catch(e) {}
+  }
+
+  async function submitProduct() {
+    const title = document.getElementById('p-title').value.trim();
+    const price = document.getElementById('p-price').value;
+    const gdrive = document.getElementById('p-gdrive').value.trim();
+    if (!title || !price || !gdrive) return showToast('Title, harga, dan gdrive URL wajib!', 'error');
+    const body = {
+      title, price,
+      description: document.getElementById('p-desc').value,
+      category: document.getElementById('p-category').value,
+      thumbnail_url: document.getElementById('p-thumbnail').value,
+      preview_html: document.getElementById('p-preview').value,
+      gdrive_url: gdrive,
+      tech_stack: document.getElementById('p-tech').value.split(',').map(s=>s.trim()).filter(Boolean),
+      features: document.getElementById('p-features').value.split(',').map(s=>s.trim()).filter(Boolean),
+    };
+    try {
+      const res = await fetch(`${API}/api/admin/products`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken }, body: JSON.stringify(body) });
+      const json = await res.json();
+      if (!json.success) return showToast(json.error, 'error');
+      showToast('✅ Produk ditambahkan!', 'success');
+      ['p-title','p-desc','p-price','p-gdrive','p-thumbnail','p-tech','p-features','p-preview'].forEach(id => document.getElementById(id).value = '');
+    } catch(e) { showToast('Gagal', 'error'); }
+  }
+
+  async function deleteProduct(id) {
+    if (!confirm('Nonaktifkan produk ini?')) return;
+    try {
+      await fetch(`${API}/api/admin/products/${id}`, { method: 'DELETE', headers: { 'x-admin-token': adminToken } });
+      showToast('Produk dinonaktifkan', 'success');
+      loadAdminProducts();
+    } catch(e) {}
+  }
+
+  function switchTab(btn, tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.className = 'tab-btn px-4 py-2 text-sm font-semibold rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 transition-all';
+    });
+    btn.className = 'tab-btn px-4 py-2 text-sm font-semibold rounded-lg bg-violet-600 text-white transition-all';
+    ['tab-orders','tab-products','tab-add-product'].forEach(id => {
+      document.getElementById(id).classList.toggle('hidden', id !== tabId);
+    });
+    if (tabId === 'tab-products') loadAdminProducts();
+    if (tabId === 'tab-orders') loadOrders(null, '');
+  }
+
+  function showMain() {
+    document.getElementById('app-main').classList.remove('hidden');
+    document.getElementById('app-admin').classList.add('hidden');
+    document.getElementById('admin-login-view').classList.remove('hidden');
+    document.getElementById('admin-dashboard-view').classList.add('hidden');
+  }
+
+  function showCheckOrder() { document.getElementById('order-modal').classList.remove('hidden'); }
+  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  function scrollToProducts() { document.getElementById('products-section').scrollIntoView({ behavior: 'smooth' }); }
+  function escapeAttr(str) { return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+  function formatPrice(n) { return new Intl.NumberFormat('id-ID').format(n); }
+  function copyText(t) { navigator.clipboard.writeText(t); showToast('✓ Disalin!', 'success'); }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `fixed bottom-5 right-5 z-[999] px-4 py-3 rounded-xl text-sm font-semibold shadow-xl transition-all duration-300 max-w-xs ${type === 'success' ? 'bg-zinc-900 border border-green-500/40 text-green-300' : 'bg-zinc-900 border border-red-500/40 text-red-300'}`;
+    t.style.transform = 'translateY(0)';
+    t.style.opacity = '1';
+    setTimeout(() => { t.style.transform = 'translateY(64px)'; t.style.opacity = '0'; }, 3000);
+  }
+
+  document.querySelectorAll('#product-modal, #order-modal').forEach(overlay => {
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.add('hidden'); });
+  });
+
+  init();
+</script>
+</body>
+</html>
